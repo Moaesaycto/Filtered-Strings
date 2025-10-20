@@ -1,6 +1,6 @@
 # `filtered_string_view`
 
-Read this for more information on what the goal of this is: [totw/1](https://abseil.io/tips/1)._
+Read this for more information on what the goal of this is: [totw/1](https://abseil.io/tips/1).
 
 * Defines a lightweight, non-owning class `filtered_string_view` that views a read-only string through an optional filter predicate.
 * Stores:
