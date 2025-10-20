@@ -1,4 +1,4 @@
-# **filtered_string_view**
+# Filtered String View
 
 **Type:** C++ Utility (Header-only) · **Tech:** C++20, STL · **Status:** Completed
 
