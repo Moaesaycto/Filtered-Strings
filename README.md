@@ -1,26 +1,51 @@
-# `filtered_string_view`
+# **filtered_string_view**
 
-Read this for more information on what the goal of this is: [totw/1](https://abseil.io/tips/1).
+**Type:** C++ Utility (Header-only) · **Tech:** C++20, STL · **Status:** Completed
 
-* Defines a lightweight, non-owning class `filtered_string_view` that views a read-only string through an optional filter predicate.
-* Stores:
+## **Overview:**
+A lightweight, non-owning view over a char buffer that exposes only characters passing a user-supplied predicate; zero allocations, const-correct, and efficient.
 
-  * A `const char*` pointer to external string data.
-  * A `std::size_t` length.
-  * A `std::function<bool(const char&)>` predicate determining which chars are visible.
-* Defaults predicate to “always true”.
-* Provides constructors for `std::string` and `const char*`, with and without custom predicates, plus copy/move constructors.
-* Defines copy/move assignment, destructor, and subscript operator (read-only).
-* Implements `at()`, `size()`, `empty()`, `data()`, and `predicate()` methods.
-* Allows conversion to `std::string`, returning the filtered characters.
-* Defines equality (`==`) and three-way comparison (`<=>`) based on filtered content only.
-* Overloads `<<` to print the filtered view.
-* Adds non-member utilities:
+## **Key Features**
 
-  * `compose()` — combines multiple filters with short-circuiting AND logic.
-  * `split()` — splits a filtered view by a delimiter into multiple filtered subviews.
-  * `substr()` — returns a filtered substring view by index and length.
-* Implements a bidirectional `const_iterator` to traverse filtered characters.
-* Adds full iterator/range support: `begin()`, `end()`, `rbegin()`, etc., and their const versions.
-* Enforces const-correctness, noexcept where appropriate, and efficiency (no copies or allocations).
-* Requires thorough tests verifying all constructors, operators, and behaviours.
+* Stores `const char*`, `std::size_t`, and `std::function<bool(char)>` (default accepts all).
+* Constructors from `std::string` and `const char*`, with or without custom predicates; copy/move ops; dtor.
+* Safe access: `operator[]` (read-only), `at()`, `size()`, `empty()`, `data()`, `predicate()`.
+* Conversion to `std::string` returns filtered content.
+* Comparisons: `==` and `<=>` compare filtered content only.
+* Streaming: `operator<<` prints the filtered view.
+* Iteration: bidirectional `const_iterator`; full range support (`begin/end`, `cbegin/cend`, `rbegin/rend`).
+* Utilities: `compose(preds...)`, `split(view, delim)`, `substr(view, pos, count)`.
+* Marked `noexcept` where appropriate; no copies of underlying data.
+
+## **Example**
+
+```cpp
+// predicates
+auto is_alpha = [](char c){ return std::isalpha(static_cast<unsigned char>(c)); };
+auto not_space = [](char c){ return c != ' '; };
+
+// compose filters
+auto alpha_no_space = compose(is_alpha, not_space);
+
+// construct views
+filtered_string_view v1{"ab c! 123"};               // default: all chars visible
+filtered_string_view v2{std::string{"ab c! 123"}, alpha_no_space}; // "abc"
+
+// iteration
+for (char c : v2) { /* use c */ }
+
+// substring and split
+auto sub = substr(v2, 0, 2); // "ab"
+for (auto part : split(filtered_string_view{"a,b,c", [](char){return true;}}, ',')) {
+    std::string s = static_cast<std::string>(part); // "a", "b", "c"
+}
+
+// comparisons use filtered content
+filtered_string_view x{"A 1", is_alpha}; // "A"
+filtered_string_view y{"A",   is_alpha}; // "A"
+bool eq = (x == y); // true
+```
+
+## **Tests**
+
+* Cover constructors, copy/move, iteration, accessors, conversions, comparisons, streaming, and utilities (`compose/split/substr`), including edge cases (empty view, out-of-range `at()`, all-filtered-out).
