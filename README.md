@@ -28,7 +28,7 @@ auto not_space = [](char c){ return c != ' '; };
 auto alpha_no_space = compose(is_alpha, not_space);
 
 // construct views
-filtered_string_view v1{"ab c! 123"};               // default: all chars visible
+filtered_string_view v1{"ab c! 123"}; // default: all chars visible
 filtered_string_view v2{std::string{"ab c! 123"}, alpha_no_space}; // "abc"
 
 // iteration
